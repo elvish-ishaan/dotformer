@@ -119,6 +119,7 @@ class DotformerSDK {
    * @returns {Promise<Object>} File info
    */
   async getFile(fileId, options = {}) {
+    //to get a presigned url for private files
     const query = options.presigned ? '?presigned=true' : '';
     return this._request(`/files/${fileId}${query}`);
   }

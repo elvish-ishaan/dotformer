@@ -24,7 +24,7 @@ app.use(express.json());
 
 // Root route
 app.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'Express server is running' });
+  res.json({ message: 'server is running' });
 });
 
 // Register routes

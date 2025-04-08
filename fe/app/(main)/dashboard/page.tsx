@@ -73,19 +73,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-      
-      {/* Recent Activity Section */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-4">Recent Activity</h2>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center py-6">
-              <p className="text-muted-foreground">No recent activity</p>
-              <p className="text-muted-foreground mt-1">Your recent actions will appear here</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </>
   );
 }
