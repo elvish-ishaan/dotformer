@@ -1,19 +1,23 @@
 {
   "name": "dotformer-sdk",
   "version": "1.0.0",
-  "description": "JavaScript SDK for interacting with the Dotformer API",
-  "main": "index.js",
+  "description": "TypeScript SDK for interacting with the Dotformer API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "test": "node test.js",
-    "test:transform": "node tests/transform-test.js"
+    "build": "tsc",
+    "test": "ts-node test.ts",
+    "test:transform": "ts-node tests/transform-test.ts",
+    "prepare": "npm run build"
   },
   "keywords": [
     "dotformer",
     "sdk",
     "api",
     "file",
-    "transform"
+    "transform",
+    "typescript"
   ],
   "author": "Dotformer Team",
   "license": "MIT",
@@ -33,6 +37,10 @@
   },
   "devDependencies": {
     "node-fetch": "^3.3.2",
-    "form-data": "^4.0.0"
+    "form-data": "^4.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "@types/node": "^20.0.0",
+    "@types/form-data": "^2.5.0"
   }
 } 

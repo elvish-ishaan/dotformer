@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from 'react';
-import { useAppSelector } from '@/lib/redux/hooks';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,22 +12,58 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { UploadCloud, Trash2, Download, Share2, Search, Filter } from 'lucide-react';
+import { Trash2, Download, Share2, Search, Filter, UploadCloud } from 'lucide-react';
+import { fileService } from '@/lib/services/fileService';
+import { formatFileSize } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
+
+interface File {
+  id: string;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  createdAt: string;
+  updatedAt: string;
+  url: string;
+  userId: string;
+}
 
 export default function FilesPage() {
-  const { user } = useAppSelector((state) => state.auth);
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Mock data for files
-  const files = [
-    { id: 1, name: 'sample-file-1.dot', size: '2.4 MB', lastModified: '2023-12-10', type: 'dot' },
-    { id: 2, name: 'project-specs.pdf', size: '1.7 MB', lastModified: '2023-12-08', type: 'pdf' },
-    { id: 3, name: 'network-diagram.dot', size: '3.1 MB', lastModified: '2023-12-05', type: 'dot' },
-    { id: 4, name: 'presentation.pptx', size: '5.2 MB', lastModified: '2023-12-01', type: 'pptx' },
-  ];
+  const [files, setFiles] = useState<File[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredFiles = files.filter(file => 
-    file.name.toLowerCase().includes(searchTerm.toLowerCase())
+  //fetching user files from backend
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        setIsLoading(true);
+        const files = await fileService.getFiles();
+        setFiles(files);
+        setError(null);
+      } catch (err) {
+        setError("Failed to load files. Please try again later.");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchFiles();
+  }, []);
+
+  const handleDeleteFile = async (fileId: string) => {
+    try {
+      await fileService.deleteFile(fileId);
+      setFiles(prev => prev.filter(file => file.id !== fileId));
+    } catch (err) {
+      console.error("Failed to delete file:", err);
+    }
+  };
+
+  const filteredFiles = files?.filter(file => 
+    file.fileName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -40,7 +75,10 @@ export default function FilesPage() {
             Manage and organize your .dot files and other documents
           </p>
         </div>
-        <Button className="flex items-center gap-2">
+        <Button 
+          className="flex items-center gap-2"
+          onClick={() => router.push('/upload')}
+        >
           <UploadCloud className="h-4 w-4" />
           Upload File
         </Button>
@@ -66,50 +104,74 @@ export default function FilesPage() {
         <CardHeader>
           <CardTitle>Your Files</CardTitle>
           <CardDescription>
-            You have {files.length} files stored in your account
+            You have {files?.length} files stored in your account
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Size</TableHead>
-                <TableHead>Last Modified</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredFiles.length > 0 ? (
-                filteredFiles.map((file) => (
-                  <TableRow key={file.id}>
-                    <TableCell>{file.name}</TableCell>
-                    <TableCell>{file.size}</TableCell>
-                    <TableCell>{file.lastModified}</TableCell>
-                    <TableCell>{file.type}</TableCell>
-                    <TableCell className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-muted-foreground">Loading your files...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-500">{error}</p>
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => window.location.reload()}
+              >
+                Try Again
+              </Button>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Size</TableHead>
+                  <TableHead>Last Modified</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredFiles?.length > 0 ? (
+                  filteredFiles?.map((file) => (
+                    <TableRow key={file.id}>
+                      <TableCell>{file.fileName}</TableCell>
+                      <TableCell>{formatFileSize(file.fileSize)}</TableCell>
+                      <TableCell>{new Date(file.updatedAt).toLocaleDateString()}</TableCell>
+                      <TableCell>{file.fileType}</TableCell>
+                      <TableCell className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" asChild>
+                          <a href={file.url} target="_blank" rel="noopener noreferrer">
+                            <Download className="h-4 w-4" />
+                          </a>
+                        </Button>
+                        <Button variant="ghost" size="icon">
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleDeleteFile(file.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center">
+                      No files found matching your search
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center">
-                    No files found matching your search
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

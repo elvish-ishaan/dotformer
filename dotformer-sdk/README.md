@@ -1,135 +1,199 @@
 # Dotformer SDK
 
-JavaScript SDK for interacting with the Dotformer API.
+A TypeScript SDK for interacting with the Dotformer API. This SDK provides a simple and type-safe way to upload, transform, and manage files using the Dotformer service.
 
 ## Installation
 
 ```bash
 npm install dotformer-sdk
+# or
+yarn add dotformer-sdk
 ```
 
-## Usage
+## Quick Start
 
-```javascript
+```typescript
 import DotformerSDK from 'dotformer-sdk';
 
 // Initialize the SDK with your API key
-const dotformer = new DotformerSDK({
-  apiKey: 'your-api-key',
-  // Optional: override the base URL (defaults to https://api.dotformer.com)
-  // baseUrl: 'http://localhost:5000'
+const sdk = new DotformerSDK({
+  apiKey: 'your-api-key-here',
+  // Optional: specify a different base URL
+  // baseUrl: 'https://custom-api.dotformer.com'
 });
 
 // Upload a file
-async function uploadExample() {
-  try {
-    // Using File object (browser)
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-    
-    const result = await dotformer.uploadFile(file);
-    console.log('Upload success:', result);
-  } catch (error) {
-    console.error('Upload failed:', error);
-  }
-}
-
-// Get all files
-async function getFilesExample() {
-  try {
-    const result = await dotformer.getFiles();
-    console.log('Files:', result.assets);
-  } catch (error) {
-    console.error('Failed to get files:', error);
-  }
-}
-
-// Get a specific file
-async function getFileExample(fileId) {
-  try {
-    const result = await dotformer.getFile(fileId);
-    console.log('File info:', result.asset);
-  } catch (error) {
-    console.error('Failed to get file:', error);
-  }
-}
-
-// Delete a file
-async function deleteFileExample(fileId) {
-  try {
-    const result = await dotformer.deleteFile(fileId);
-    console.log('Delete result:', result);
-  } catch (error) {
-    console.error('Failed to delete file:', error);
-  }
-}
+const file = new File(['content'], 'example.txt');
+const uploadResult = await sdk.uploadFile(file, { makePublic: true });
 
 // Transform a file
-async function transformFileExample(fileId) {
-  try {
-    const options = {
-      width: 300,
-      height: 200,
-      format: 'webp',
-      quality: 80,
-      grayscale: true
-    };
-    
-    const result = await dotformer.transformFile(fileId, options);
-    console.log('Transform result:', result);
-  } catch (error) {
-    console.error('Failed to transform file:', error);
-  }
-}
+const transformResult = await sdk.transformFile('file-id', {
+  width: 800,
+  height: 600,
+  format: 'jpeg',
+  quality: 90
+});
+
+// Get file information
+const fileInfo = await sdk.getFile('file-id', { presigned: true });
+
+// List all files
+const files = await sdk.getFiles();
+
+// Delete a file
+const deleteResult = await sdk.deleteFile('file-id');
 ```
 
 ## API Reference
 
 ### Constructor
 
-```javascript
-const dotformer = new DotformerSDK({
-  apiKey: 'your-api-key',
-  baseUrl: 'https://api.dotformer.com' // Optional
-});
+```typescript
+new DotformerSDK(config: SDKConfig)
 ```
+
+#### Configuration Options
+
+| Option  | Type   | Required | Default                    | Description                    |
+|---------|--------|----------|----------------------------|--------------------------------|
+| apiKey  | string | Yes      | -                          | Your Dotformer API key         |
+| baseUrl | string | No       | 'https://api.dotformer.com' | Custom API base URL            |
 
 ### Methods
 
-#### `uploadFile(file, options)`
+#### uploadFile
+
 Upload a file to Dotformer.
 
-- `file`: File, Blob, or Buffer to upload
-- `options`: Upload options
-  - `makePublic`: Boolean (default: true) - Make the file publicly accessible
+```typescript
+async uploadFile(file: File | Blob | Buffer, options?: FileOptions): Promise<ApiResponse>
+```
 
-#### `getFiles()`
+##### Parameters
+
+| Parameter | Type                    | Required | Description                    |
+|-----------|-------------------------|----------|--------------------------------|
+| file      | File \| Blob \| Buffer | Yes      | The file to upload            |
+| options   | FileOptions            | No       | Upload options                |
+
+##### FileOptions
+
+| Option     | Type    | Default | Description                    |
+|------------|---------|---------|--------------------------------|
+| makePublic | boolean | true    | Make the file publicly accessible |
+
+#### getFiles
+
 Get all files for the authenticated user.
 
-#### `getFile(fileId, options)`
-Get a specific file by ID.
+```typescript
+async getFiles(): Promise<ApiResponse>
+```
 
-- `fileId`: ID of the file to retrieve
-- `options`: File options
-  - `presigned`: Boolean (default: false) - Get a presigned URL for private files
+#### getFile
 
-#### `deleteFile(fileId)`
-Delete a file by ID.
+Get information about a specific file.
 
-- `fileId`: ID of the file to delete
+```typescript
+async getFile(fileId: string, options?: GetFileOptions): Promise<ApiResponse>
+```
 
-#### `transformFile(fileId, options)`
-Transform a file.
+##### Parameters
 
-- `fileId`: ID of the file to transform
-- `options`: Transformation options
-  - `width`: Target width
-  - `height`: Target height
-  - `format`: Output format (jpeg, png, webp, etc.)
-  - `quality`: Output quality (1-100)
-  - `fit`: Fit method (cover, contain, fill, etc.)
-  - `grayscale`: Convert to grayscale
-  - `rotate`: Rotation angle in degrees
+| Parameter | Type          | Required | Description                    |
+|-----------|---------------|----------|--------------------------------|
+| fileId    | string        | Yes      | ID of the file to retrieve    |
+| options   | GetFileOptions| No       | File options                  |
+
+##### GetFileOptions
+
+| Option    | Type    | Default | Description                    |
+|-----------|---------|---------|--------------------------------|
+| presigned | boolean | false   | Get a presigned URL for private files |
+
+#### deleteFile
+
+Delete a file.
+
+```typescript
+async deleteFile(fileId: string): Promise<ApiResponse>
+```
+
+##### Parameters
+
+| Parameter | Type   | Required | Description                    |
+|-----------|--------|----------|--------------------------------|
+| fileId    | string | Yes      | ID of the file to delete      |
+
+#### transformFile
+
+Transform a file with various options.
+
+```typescript
+async transformFile(fileId: string, options?: TransformOptions): Promise<ApiResponse>
+```
+
+##### Parameters
+
+| Parameter | Type            | Required | Description                    |
+|-----------|-----------------|----------|--------------------------------|
+| fileId    | string          | Yes      | ID of the file to transform   |
+| options   | TransformOptions| No       | Transformation options        |
+
+##### TransformOptions
+
+| Option     | Type    | Description                    |
+|------------|---------|--------------------------------|
+| width      | number  | Target width in pixels         |
+| height     | number  | Target height in pixels        |
+| format     | string  | Output format (jpeg, png, webp)|
+| quality    | number  | Output quality (1-100)         |
+| fit        | string  | Fit method (cover, contain, fill)|
+| grayscale  | boolean | Convert to grayscale           |
+| rotate     | number  | Rotation angle in degrees      |
+
+### Response Types
+
+All methods return a Promise that resolves to an `ApiResponse` object:
+
+```typescript
+interface ApiResponse<T = any> {
+  data?: T;
+  error?: string;
+}
+```
+
+## Error Handling
+
+The SDK throws errors in the following cases:
+
+- Invalid API key
+- Network errors
+- API errors (with status code and error message)
+
+Example error handling:
+
+```typescript
+try {
+  const result = await sdk.uploadFile(file);
+} catch (error) {
+  if (error.status) {
+    // API error
+    console.error(`API Error (${error.status}): ${error.message}`);
+  } else {
+    // Network or other error
+    console.error('Error:', error.message);
+  }
+}
+```
+
+## TypeScript Support
+
+This SDK is written in TypeScript and includes type definitions. All methods and interfaces are fully typed, providing excellent IDE support and type checking.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 

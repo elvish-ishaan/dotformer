@@ -1,10 +1,28 @@
+"use client";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+interface User {
+  email: string;
+  name: string;
+  avatar: string;
+}
 
 export default function Home() {
+  const user = useSelector((state: User) => state.email);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      router.push("/dashboard");
+    }
+  }, [user, router]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Navbar */}
@@ -232,7 +250,7 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <p className="italic text-muted-foreground">
-                  "Dotformer has streamlined our image processing workflow completely. What used to take us hours now happens in seconds."
+                  &quot;Dotformer has streamlined our image processing workflow completely. What used to take us hours now happens in seconds.&quot;
                 </p>
               </CardContent>
             </Card>
@@ -253,7 +271,7 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <p className="italic text-muted-foreground">
-                  "The API is so well designed. I integrated it into our platform in less than a day. The documentation is excellent."
+                  &quot;The API is so well designed. I integrated it into our platform in less than a day. The documentation is excellent.&quot;
                 </p>
               </CardContent>
             </Card>
@@ -274,7 +292,7 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <p className="italic text-muted-foreground">
-                  "Our marketing team loves how easy it is to transform images on the fly. No more waiting for designer availability."
+                  &quot;Our marketing team loves how easy it is to transform images on the fly. No more waiting for designer availability.&quot;
                 </p>
               </CardContent>
             </Card>

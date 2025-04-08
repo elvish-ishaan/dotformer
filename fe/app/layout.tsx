@@ -4,6 +4,7 @@ import "./globals.css";
 import { ReduxProvider } from "@/lib/redux/provider";
 import ApiKeyDebug from '@/components/ApiKeyDebug';
 import { Toaster } from 'sonner';
+import { cn } from "@/lib/utils";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,9 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={cn("min-h-screen bg-background font-sans antialiased", geistSans.variable, geistMono.variable)}>
         <ReduxProvider>
           {children}
           <ApiKeyDebug />

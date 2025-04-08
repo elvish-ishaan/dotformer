@@ -1,5 +1,14 @@
 // Define the API base URL
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
+interface TransformOptions {
+  width?: number;
+  height?: number;
+  format?: string;
+  quality?: number;
+  fit?: string;
+  background?: string;
+} 
 
 /**
  * Service for handling file operations with the backend API
@@ -13,7 +22,7 @@ class FileService {
    * @param token - Authentication token
    * @returns Promise with the uploaded file data
    */
-  async uploadFile(file: File, makePublic: boolean = true, token?: string): Promise<any> {
+  async uploadFile(file: File, makePublic: boolean = true, token?: string) {
     try {
       // Create FormData
       const formData = new FormData();
@@ -24,7 +33,7 @@ class FileService {
       const authToken = token || localStorage.getItem('token') || '';
 
       // Upload file to backend
-      const response = await fetch(`${API_BASE_URL}/api/files/upload`, {
+      const response = await fetch(`${API_BASE_URL}/files/upload`, {
         method: 'POST',
         headers: {
           'Authorization': authToken ? `Bearer ${authToken}` : '',
@@ -50,12 +59,12 @@ class FileService {
    * @param token - Authentication token
    * @returns Promise with the file list
    */
-  async getFiles(token?: string): Promise<any[]> {
+  async getFiles(token?: string){
     try {
       // Get auth token from localStorage or cookies if not provided
       const authToken = token || localStorage.getItem('token') || '';
 
-      const response = await fetch(`${API_BASE_URL}/api/files`, {
+      const response = await fetch(`${API_BASE_URL}/files`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -82,12 +91,12 @@ class FileService {
    * @param token - Authentication token
    * @returns Promise with the file data
    */
-  async getFile(fileId: string, token?: string): Promise<any> {
+  async getFile(fileId: string, token?: string) {
     try {
       // Get auth token from localStorage or cookies if not provided
       const authToken = token || localStorage.getItem('token') || '';
 
-      const response = await fetch(`${API_BASE_URL}/api/files/${fileId}`, {
+      const response = await fetch(`${API_BASE_URL}/files/${fileId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -114,12 +123,12 @@ class FileService {
    * @param token - Authentication token
    * @returns Promise indicating success
    */
-  async deleteFile(fileId: string, token?: string): Promise<any> {
+  async deleteFile(fileId: string, token?: string) {
     try {
       // Get auth token from localStorage or cookies if not provided
       const authToken = token || localStorage.getItem('token') || '';
 
-      const response = await fetch(`${API_BASE_URL}/api/files/${fileId}`, {
+      const response = await fetch(`${API_BASE_URL}/files/${fileId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -147,7 +156,8 @@ class FileService {
    * @param token - Authentication token
    * @returns Promise with the transformed file data
    */
-  async transformFile(fileId: string, transformOptions: any, token?: string): Promise<any> {
+
+  async transformFile(fileId: string, transformOptions: TransformOptions, token?: string) {
     try {
       // Get auth token from localStorage or cookies if not provided
       const authToken = token || localStorage.getItem('token') || '';
@@ -160,7 +170,7 @@ class FileService {
         }
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/files/transform/${fileId}?${queryParams.toString()}`, {
+      const response = await fetch(`${API_BASE_URL}/files/transform/${fileId}?${queryParams.toString()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

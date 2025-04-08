@@ -69,7 +69,6 @@ const billingService = {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
-      console.log(response,'getting billing usage res.............')
       return response.data;
     } catch (error) {
       console.error('Error fetching usage stats:', error);

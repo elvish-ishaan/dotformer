@@ -154,7 +154,7 @@ export default function Dashboard() {
         </Button>
         
         <Button variant="outline" className="h-auto py-4" asChild>
-          <Link href="/api-keys/new">
+          <Link href="/api-keys">
             <span className="flex flex-col">
               <span className="text-base font-medium">Create API Key</span>
               <span className="text-xs text-muted-foreground">Generate new API keys for your apps</span>

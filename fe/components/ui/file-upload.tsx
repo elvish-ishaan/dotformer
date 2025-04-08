@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./card";
 import { fileService } from "@/lib/services/fileService";
 
 // Define the API base URL
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 interface FileUploadProps {
   onUploadSuccess?: (data: any) => void;
