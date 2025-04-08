@@ -22,7 +22,7 @@ export const uploadFile = async (req: Request, res: Response) => {
     const { buffer, originalname, mimetype } = req.file;
     
     // Get the user ID from the authenticated user (if available)
-    const userId = (req as any).user?.id || '';
+    const userId = (req as any).user?.userId || '';
     
     // Get the makePublic param (default to true)
     const makePublic = req.body.makePublic !== 'false';
@@ -53,7 +53,7 @@ export const uploadFile = async (req: Request, res: Response) => {
 export const getFiles = async (req: Request, res: Response) => {
   try {
     // Get the user ID from the authenticated user
-    const userId = (req as any).user?.id || '';
+    const userId = (req as any).user?.userId || '';
     
     // Get all assets for this user from the database
     const assets = await prisma.asset.findMany({
