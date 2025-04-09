@@ -166,7 +166,7 @@ class FileStorageService {
    * @param expiresIn - Expiration time in seconds (default: 3600)
    * @returns Promise with the presigned URL
    */
-  async getPresignedUrl(assetId: string, expiresIn = 3600) {
+  async getPresignedUrl(assetId: string, expiresIn = 3600) { //expires in 1 hour
     try {
       const asset = await prisma.asset.findUnique({
         where: {
@@ -210,12 +210,6 @@ class FileStorageService {
     }
   }
 
-  /**
-   * Checks if a file exists in S3
-   * 
-   * @param s3Key - The S3 key to check
-   * @returns Promise with boolean result
-   */
   async fileExists(s3Key: string) {
     try {
       await this.s3Client.send(new HeadObjectCommand({
@@ -229,12 +223,6 @@ class FileStorageService {
     }
   }
 
-  /**
-   * Gets information about a file by its ID
-   * 
-   * @param assetId - ID of the asset
-   * @returns Promise with the asset data
-   */
   async getFileInfo(assetId: string) {
     try {
       const asset = await prisma.asset.findUnique({

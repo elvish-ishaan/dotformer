@@ -20,16 +20,9 @@ interface TransformOptions {
   grayscale?: boolean;
 }
 
-/**
- * Transforms an image buffer using Sharp based on provided options
- * 
- * @param imageBuffer - Buffer containing the image data
- * @param options - Transformation options
- * @returns Promise with transformed image buffer
- */
+//transform the image buffer using sharp based on the options
 export async function transformImageBuffer(imageBuffer: Buffer, options: TransformOptions): Promise<Buffer> {
   try {
-    console.log('Transforming image with options:', options);
     
     // Initialize Sharp with the input buffer
     let transformer = sharp(imageBuffer);
@@ -81,15 +74,6 @@ export async function transformImageBuffer(imageBuffer: Buffer, options: Transfo
   }
 }
 
-/**
- * Transforms an image from S3 and optionally uploads the result back to S3
- * 
- * @param fileName - S3 key of the image to transform
- * @param options - Transformation options
- * @param sourceBucket - S3 bucket containing the source image
- * @param targetBucket - S3 bucket to store the transformed image (optional)
- * @returns Promise with the result object
- */
 export async function transformS3Image(
   fileName: string, 
   options: TransformOptions, 
@@ -104,8 +88,6 @@ export async function transformS3Image(
   cached?: boolean;
 }> {
   try {
-    console.log(`Transforming S3 image: ${fileName}`);
-    console.log('Options:', options);
     
     // Initialize S3 client
     const s3Client = new S3Client({
@@ -128,6 +110,8 @@ export async function transformS3Image(
       
       // If we get here, the object exists - return the URL without re-transforming
       const cloudFrontDomain = process.env.CLOUDFRONT_DOMAIN;
+      //explain me this code
+      //if the cloudfront domain is set then use it else use the target bucket
       const transformedUrl = cloudFrontDomain 
         ? `https://${cloudFrontDomain}/${transformedKey}`
         : `https://${targetBucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${transformedKey}`;
@@ -140,9 +124,10 @@ export async function transformS3Image(
         cached: true  // Indicate this was served from cache
       };
     } catch (error) {
-      // Object doesn't exist, continue with transformation
+      console.log('object does not exist, continuing with transformation')
     }
 
+    // Object doesn't exist, continue with transformation
     // Get the image from S3
     const getObjectResponse = await s3Client.send(new GetObjectCommand({
       Bucket: sourceBucket,
@@ -215,12 +200,6 @@ export async function transformS3Image(
   }
 }
 
-/**
- * Utility function to convert a stream to a buffer
- * 
- * @param stream - Readable stream
- * @returns Promise with buffer
- */
 async function streamToBuffer(stream: Readable): Promise<Buffer> {
   return new Promise<Buffer>((resolve, reject) => {
     const chunks: Buffer[] = [];
@@ -267,6 +246,7 @@ export async function transformLocalImage(
 
 function generateTransformationKey(fileName: string, options: TransformOptions): string {
   // Create a deterministic string representation of the options
+  //used to generate a url string regardless of the order of the options
   const optionsString = JSON.stringify(Object.entries(options)
     .filter(([_, value]) => value !== undefined)
     .sort(([keyA], [keyB]) => keyA.localeCompare(keyB)));
