@@ -5,8 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 interface PaymentMethodFormProps {
-  onSave: (paymentDetails: any) => Promise<void>;
+  onSave: (paymentDetails: PaymentMethodData) => Promise<void>;
   hasPaymentMethod: boolean;
+}
+
+interface PaymentMethodData {
+  cardNumber: string;
+  expiryDate: string;
+  cvv: string;
+  cardholderName: string;
 }
 
 const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({ 
@@ -18,11 +25,11 @@ const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
   // In a real app, this would use a proper payment integration library
   // like Stripe Elements for secure payment collection
   // For now, we'll use a simplified form for demonstration
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PaymentMethodData>({
     cardNumber: '',
     cardholderName: '',
     expiryDate: '',
-    cvc: ''
+    cvv: ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +46,7 @@ const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
       // and only send the token to your server
       const paymentMethodId = `pm_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
       
-      await onSave({ paymentMethodId });
+      await onSave({ ...formData, paymentMethodId });
     } catch (error) {
       console.error('Error saving payment method:', error);
     } finally {
@@ -98,12 +105,12 @@ const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cvc">CVC</Label>
+              <Label htmlFor="cvv">CVC</Label>
               <Input
-                id="cvc"
-                name="cvc"
+                id="cvv"
+                name="cvv"
                 placeholder="123"
-                value={formData.cvc}
+                value={formData.cvv}
                 onChange={handleChange}
                 required
                 maxLength={3}

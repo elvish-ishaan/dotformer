@@ -10,9 +10,6 @@ import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { login, clearError } from "@/lib/redux/slices/authSlice";
 import { Eye, EyeOff } from "lucide-react";
 
-// Define the API base URL
-const API_BASE_URL = "http://localhost:5000"; // Your backend server runs on port 5000
-
 export default function Login() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -197,9 +194,9 @@ export default function Login() {
           </CardContent>
           <CardFooter className="flex justify-center">
             <div className="text-sm text-center">
-              Don't have an account?{" "}
-              <Link href="/auth/sign-up" className="text-primary font-medium hover:underline">
-                Sign up
+              Don&apos;t have an account?{" "}
+              <Link href="/auth/register" className="text-primary font-medium hover:underline">
+                Register
               </Link>
             </div>
           </CardFooter>

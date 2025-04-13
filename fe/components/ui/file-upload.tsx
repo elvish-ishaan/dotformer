@@ -4,15 +4,24 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./card";
 import { fileService } from "@/lib/services/fileService";
 
 // Define the API base URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface FileUploadProps {
-  onUploadSuccess?: (data: any) => void;
-  onUploadError?: (error: string) => void;
+  onUploadSuccess: (file: UploadedFile) => void;
+  onUploadError: (error: string) => void;
   accept?: string;
   maxSize?: number;  // In bytes
   makePublic?: boolean;
   className?: string;
+  allowedTypes?: string[];
+}
+
+interface UploadedFile {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
 }
 
 export function FileUpload({
@@ -22,6 +31,7 @@ export function FileUpload({
   maxSize = 10 * 1024 * 1024, // 10MB default
   makePublic = true,
   className,
+  allowedTypes = ['image/jpeg', 'image/png', 'image/webp'],
 }: FileUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -43,6 +53,12 @@ export function FileUpload({
       return;
     }
 
+    // Validate file type
+    if (allowedTypes && !allowedTypes.includes(selectedFile.type)) {
+      setError(`File type not allowed. Allowed types: ${allowedTypes.join(', ')}`);
+      return;
+    }
+
     setFile(selectedFile);
   };
 
@@ -60,6 +76,12 @@ export function FileUpload({
     // Validate file size
     if (droppedFile.size > maxSize) {
       setError(`File size exceeds the ${maxSize / (1024 * 1024)}MB limit`);
+      return;
+    }
+
+    // Validate file type
+    if (allowedTypes && !allowedTypes.includes(droppedFile.type)) {
+      setError(`File type not allowed. Allowed types: ${allowedTypes.join(', ')}`);
       return;
     }
 

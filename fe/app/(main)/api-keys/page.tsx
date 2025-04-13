@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -71,19 +71,44 @@ export default function ApiKeysPage() {
     }
   }, []);
   
-  // Check authentication status
+  const fetchApiKeys = useCallback(async () => {
+    if (!isAuthenticated) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await getApiKeys();
+      if (result.success && result.apiKeys) {
+        setApiKeys(result?.apiKeys);
+        router.refresh();
+      } else {
+        setError(result.error || 'Failed to fetch API keys');
+        toast.error(result.error || 'Failed to fetch API keys');
+        
+        if (result.error === 'Authentication required') {
+          setIsAuthenticated(false);
+        }
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, router]);
+
   useEffect(() => {
     const token = getAuthToken();
-   
     setIsAuthenticated(!!token || authState.isAuthenticated);
     
     if (!token && !authState.isAuthenticated) {
       setError('You need to be logged in to manage API keys');
     } else {
-      // Fetch API keys if authenticated
       fetchApiKeys();
     }
-  }, [authState.isAuthenticated]);
+  }, [authState.isAuthenticated, fetchApiKeys]);
   
   // Reset state when dialog closes
   useEffect(() => {
@@ -102,36 +127,6 @@ export default function ApiKeysPage() {
     router.push('/auth/login?redirect=/api-keys');
   };
   
-  const fetchApiKeys = async () => {
-    if (!isAuthenticated) return;
-    
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const result = await getApiKeys();
-      if (result.success && result.apiKeys) {
-        setApiKeys(result?.apiKeys);
-        //refresh the page
-        router.refresh();
-      } else {
-        setError(result.error || 'Failed to fetch API keys');
-        toast.error(result.error || 'Failed to fetch API keys');
-        
-        // If authentication error, prompt to login
-        if (result.error === 'Authentication required') {
-          setIsAuthenticated(false);
-        }
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleCreateKey = async () => {
     if (!newKeyName.trim() || !isAuthenticated) return;
     

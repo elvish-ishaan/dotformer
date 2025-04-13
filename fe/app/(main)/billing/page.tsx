@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import BillingSummaryCard from '@/components/BillingSummaryCard';
 import BillingHistoryTable from '@/components/BillingHistoryTable';
 import UsageChart from '@/components/UsageChart';
-import billingService, { Bill, PricingPlan, UsageStats } from '@/lib/services/billingService';
+import billingService, { Bill, UsageStats } from '@/lib/services/billingService';
 
 export default function BillingPage() {
   const router = useRouter();
