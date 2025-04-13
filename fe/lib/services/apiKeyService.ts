@@ -27,10 +27,18 @@ if (process.env.NODE_ENV === 'development') {
  */
 export async function getApiKeys(): Promise<{ success: boolean; apiKeys?: ApiKey[]; error?: string }> {
   try {
-    console.log('Fetching API keys from:', `${API_BASE_URL}/api/api-keys`);
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/api-keys`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/api-keys`);
     
-    console.log('API keys response status:', response.status);
+    // Clone the response to avoid "body already read" errors
+    const responseClone = response.clone();
+    
+    // Log the actual response data for debugging
+    try {
+      const responseData = await responseClone.json();
+      return responseData;
+    } catch (e) {
+      console.log('Could not parse response data for logging:', e);
+    }
     
     // Handle successful empty response (204 No Content)
     if (response.status === 204) {
@@ -68,12 +76,12 @@ export async function createApiKey(name: string, expiresInDays?: number): Promis
 }> {
   try {
     console.log(`Creating API key with name: ${name}, expires in: ${expiresInDays || 'no expiration'}`);
-    console.log('API endpoint:', `${API_BASE_URL}/api/api-keys`);
+    console.log('API endpoint:', `${API_BASE_URL}/api-keys`);
     
     const requestBody = { name, expiresInDays };
     console.log('Request body:', JSON.stringify(requestBody));
     
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/api-keys`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api-keys`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -141,7 +149,7 @@ export async function createApiKey(name: string, expiresInDays?: number): Promis
  */
 export async function deleteApiKey(keyId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/api-keys/${keyId}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api-keys/${keyId}`, {
       method: 'DELETE',
     });
     
@@ -172,7 +180,7 @@ export async function updateApiKey(
   updateData: { name?: string; isActive?: boolean }
 ): Promise<{ success: boolean; apiKey?: ApiKey; error?: string }> {
   try {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/api-keys/${keyId}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api-keys/${keyId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

@@ -23,7 +23,6 @@ export function getAuthToken(): string | null {
 export async function fetchWithAuth(url: string, options: RequestInit = {}) {
   const token = getAuthToken();
   
-  console.log('Using auth token:', token ? 'Token exists' : 'No token');
   
   const headers = {
     ...options.headers,
@@ -31,7 +30,6 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
   };
   
   try {
-    console.log(`Making authenticated request to: ${url}`);
     return await fetch(url, {
       ...options,
       headers,

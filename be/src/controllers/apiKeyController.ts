@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { createApiKey, getApiKeys, deleteApiKey, updateApiKey } from '../services/apiKeyService';
+import { createApiKey, getApiKeys, deleteApiKey, updateApiKey, getApiKeyValue } from '../services/apiKeyService';
 
 /**
  * Create a new API key for the authenticated user
@@ -32,13 +32,7 @@ export const createKey = async (req: Request, res: Response) => {
     }
     
     // Create new API key
-    console.log(`Create API key - Creating key for user ${userId} with name "${name}" and expiresInDays:`, expiresInDays);
     const result = await createApiKey(userId, name, expiresInDays);
-    console.log('Create API key - Result:', JSON.stringify({ 
-      success: result.success, 
-      apiKeyId: result.apiKey?.id, 
-      error: result.error
-    }));
     
     return res.status(201).json(result);
   } catch (error) {
@@ -68,6 +62,7 @@ export const getKeys = async (req: Request, res: Response) => {
     
     // Get all keys
     const result = await getApiKeys(userId);
+    console.log(result,'getting api keys...............')
     
     return res.status(200).json(result);
   } catch (error) {
@@ -171,6 +166,48 @@ export const updateKey = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to update API key'
+    });
+  }
+};
+
+/**
+ * Get a specific API key's value
+ * @route GET /api/api-keys/:keyId/value
+ */
+export const getKeyValue = async (req: Request, res: Response) => {
+  try {
+    // Get the user ID from the authenticated user
+    const userId = req.user?.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Not authenticated'
+      });
+    }
+    
+    const { keyId } = req.params;
+    
+    if (!keyId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Key ID is required'
+      });
+    }
+    
+    // Get the key value
+    const result = await getApiKeyValue(keyId, userId);
+    
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
+    
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error('Error fetching API key value:', error);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch API key value'
     });
   }
 }; 

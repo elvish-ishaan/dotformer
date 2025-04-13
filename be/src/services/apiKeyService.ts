@@ -1,13 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import { randomBytes, createHash } from 'crypto';
-
+import { v4 as uuidv4 } from 'uuid';
 const prisma = new PrismaClient();
 
 // Generate a secure random API key
 export const generateApiKey = (): string => {
-  // Generate 32 random bytes and convert to hex
-  const buffer = randomBytes(32);
-  return buffer.toString('hex');
+  let keyArray = uuidv4().split('-');
+  //USE LOOP INSTEAD OF CONCATENATION
+  let key = keyArray[0]+keyArray[1]+keyArray[2]+keyArray[3]+keyArray[4];
+  return key;
 };
 
 // Hash the API key for verification (optional additional security)
@@ -208,6 +209,36 @@ export const validateApiKey = async (key: string) => {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to validate API key'
+    };
+  }
+};
+
+// Get a specific API key's value
+export const getApiKeyValue = async (keyId: string, userId: string) => {
+  try {
+    const apiKey = await prisma.apiKey.findFirst({
+      where: {
+        id: keyId,
+        userId
+      }
+    });
+    
+    if (!apiKey) {
+      return {
+        success: false,
+        error: 'API key not found or does not belong to this user'
+      };
+    }
+    
+    return {
+      success: true,
+      key: apiKey.key
+    };
+  } catch (error) {
+    console.error('Error fetching API key value:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch API key value'
     };
   }
 }; 

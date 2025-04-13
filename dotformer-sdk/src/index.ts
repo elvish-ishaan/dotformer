@@ -109,9 +109,21 @@ class DotformerSDK {
    * @param file - File to upload
    * @param options - Upload options
    */
-  async uploadFile(file: File | Blob | Buffer , options: FileOptions = {}): Promise<ApiResponse> {
+  async uploadFile(file: File | Blob | Buffer, options: FileOptions = {}): Promise<ApiResponse> {
     const formData = new FormData();
-    formData.append('file', file);
+    
+    // Handle different file types correctly
+    if (Buffer.isBuffer(file)) {
+      // For Node.js Buffer, convert to Blob with appropriate filename
+      const blob = new Blob([file]);
+      formData.append('file', blob, 'file.bin');
+    } else if (file instanceof File) {
+      // File already has filename information
+      formData.append('file', file);
+    } else {
+      // For Blob without filename
+      formData.append('file', file, 'file.bin');
+    }
     
     if (options.makePublic !== undefined) {
       formData.append('makePublic', options.makePublic.toString());

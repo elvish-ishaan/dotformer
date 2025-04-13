@@ -56,6 +56,7 @@ export default function ApiKeysPage() {
   const [isCopied, setIsCopied] = useState(false);
   const [visibleKeyId, setVisibleKeyId] = useState<string | null>(null);
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
+  const [apiKeyValues, setApiKeyValues] = useState<Record<string, string>>({});
   
   // Get auth state from Redux
   const authState = useAppSelector((state) => state.auth);
@@ -73,9 +74,7 @@ export default function ApiKeysPage() {
   // Check authentication status
   useEffect(() => {
     const token = getAuthToken();
-    console.log('Auth token present:', !!token);
-    console.log('Redux auth state:', authState.isAuthenticated ? 'Authenticated' : 'Not authenticated');
-    
+   
     setIsAuthenticated(!!token || authState.isAuthenticated);
     
     if (!token && !authState.isAuthenticated) {
@@ -111,9 +110,8 @@ export default function ApiKeysPage() {
     
     try {
       const result = await getApiKeys();
-      
       if (result.success && result.apiKeys) {
-        setApiKeys(result.apiKeys);
+        setApiKeys(result?.apiKeys);
         //refresh the page
         router.refresh();
       } else {
@@ -143,13 +141,21 @@ export default function ApiKeysPage() {
     try {
       const result = await createApiKey(newKeyName);
       
-      if (result.success && result.apiKey) {
+      if (result.success && result.apiKey?.value && result.apiKey?.apiKey) {
+        const { value, apiKey } = result.apiKey;
+        
         // Set the generated key value to show in the UI
-        setGeneratedKey(result.apiKey.value);
+        setGeneratedKey(value);
+        
+        // Store the actual key value
+        setApiKeyValues(prev => ({
+          ...prev,
+          [apiKey.id]: value
+        }));
         
         // Add the new key to the list
         setApiKeys(prevKeys => [
-          ...(result.apiKey?.apiKey ? [result.apiKey.apiKey] : []),
+          apiKey,
           ...prevKeys
         ]);
         
@@ -260,9 +266,13 @@ export default function ApiKeysPage() {
 
   const getMaskedKeyDisplay = (key: ApiKey) => {
     if (visibleKeyId === key.id) {
-      // In a real implementation, you would fetch the full key
-      // For this demo, we'll just show a fake visible key
-      return <span className="text-green-600">{key.prefix}{'xyzABC123example'}</span>;
+      // Show the actual key value if we have it stored
+      const actualKey = apiKeyValues[key.id];
+      if (actualKey) {
+        return <span className="text-green-600">{actualKey}</span>;
+      }
+      // If we don't have the actual key, show the prefix with masked value
+      return <span>{key.prefix}••••••••••••••</span>;
     }
     return <span>{key.prefix}••••••••••••••</span>;
   };
