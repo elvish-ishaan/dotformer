@@ -9,6 +9,9 @@ interface User {
   id: string;
   name: string | null;
   email: string;
+  bio?: string;
+  username?: string;
+  avatar?: string;
 }
 
 interface AuthState {

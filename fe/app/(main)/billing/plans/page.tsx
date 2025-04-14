@@ -8,8 +8,11 @@ import PaymentMethodForm from '@/components/PaymentMethodForm';
 import billingService, { PricingPlan } from '@/lib/services/billingService';
 import { toast } from 'sonner';
 
-interface PaymentDetails {
-  paymentMethodId: string;
+interface PaymentMethodData {
+  cardNumber: string;
+  expiryDate: string;
+  cvv: string;
+  cardholderName: string;
 }
 
 export default function PlansPage() {
@@ -71,9 +74,22 @@ export default function PlansPage() {
   };
   
   // Handle payment method save
-  const handleSavePaymentMethod = async (paymentDetails: PaymentDetails) => {
+  const handleSavePaymentMethod = async (paymentDetails: PaymentMethodData) => {
     try {
-      await billingService.updatePaymentMethod(paymentDetails.paymentMethodId);
+      // In a real app, you would send the payment details to your payment processor
+      // and get back a payment method ID. For now, we'll generate a mock ID.
+      const paymentMethodId = `pm_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+      
+      // In a real app, you would send these details to your payment processor
+      // For now, we'll just log them (with sensitive data masked)
+      console.log('Processing payment details:', {
+        cardholderName: paymentDetails.cardholderName,
+        cardNumber: paymentDetails.cardNumber.replace(/\d(?=\d{4})/g, '*'),
+        expiryDate: paymentDetails.expiryDate,
+        cvv: '***'
+      });
+      
+      await billingService.updatePaymentMethod(paymentMethodId);
       setHasPaymentMethod(true);
       setShowPaymentForm(false);
       

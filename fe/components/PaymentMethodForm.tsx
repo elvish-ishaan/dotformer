@@ -44,9 +44,7 @@ const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
     try {
       // In a real app, you would tokenize this data with a payment processor
       // and only send the token to your server
-      const paymentMethodId = `pm_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
-      
-      await onSave({ ...formData, paymentMethodId });
+      await onSave(formData);
     } catch (error) {
       console.error('Error saving payment method:', error);
     } finally {
