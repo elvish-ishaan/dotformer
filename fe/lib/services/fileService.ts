@@ -75,6 +75,7 @@ class FileService {
       const data = await response.json();
 
       if (!response.ok) {
+        console.log(response,'getting files')
         throw new Error(data.error || 'Failed to fetch files');
       }
 

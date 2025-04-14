@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { logout } from "@/lib/redux/slices/authSlice";
 import { ReactNode } from "react";
+import { ImageIcon } from "lucide-react";
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -25,11 +26,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         <div className="container px-4 md:px-6 mx-auto max-w-6xl">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                <polyline points="3.29 7 12 12 20.71 7"></polyline>
-                <line x1="12" y1="22" x2="12" y2="12"></line>
-              </svg>
+              <ImageIcon className="size-6 text-primary" />
               <span className="text-xl font-bold">Dotformer</span>
             </div>
             

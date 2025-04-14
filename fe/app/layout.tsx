@@ -5,6 +5,7 @@ import { ReduxProvider } from "@/lib/redux/provider";
 import ApiKeyDebug from '@/components/ApiKeyDebug';
 import { Toaster } from 'sonner';
 import { cn } from "@/lib/utils";
+import Navbar from "@/components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +31,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={cn("min-h-screen bg-background font-sans antialiased", geistSans.variable, geistMono.variable)}>
         <ReduxProvider>
+          <Navbar />
           {children}
           <ApiKeyDebug />
           <Toaster position="top-right" />

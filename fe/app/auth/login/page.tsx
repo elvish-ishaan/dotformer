@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { login, clearError } from "@/lib/redux/slices/authSlice";
-import { Eye, EyeOff } from "lucide-react";
+import { CircleDotDashed, Eye, EyeOff } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
@@ -102,11 +102,7 @@ function LoginForm() {
       <div className="w-full max-w-md">
         <div className="mb-8 flex justify-center">
           <Link href="/" className="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-              <polyline points="3.29 7 12 12 20.71 7"></polyline>
-              <line x1="12" y1="22" x2="12" y2="12"></line>
-            </svg>
+            <CircleDotDashed className="size-6 text-primary" />
             <span className="text-xl font-bold">Dotformer</span>
           </Link>
         </div>
@@ -195,7 +191,7 @@ function LoginForm() {
           <CardFooter className="flex justify-center">
             <div className="text-sm text-center">
               Don&apos;t have an account?{" "}
-              <Link href="/auth/register" className="text-primary font-medium hover:underline">
+              <Link href="/auth/sign-up" className="text-primary font-medium hover:underline">
                 Register
               </Link>
             </div>

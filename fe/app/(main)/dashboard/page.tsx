@@ -37,7 +37,9 @@ export default function Dashboard() {
       try {
         // Fetch files to get count
         const files = await fileService.getFiles();
-        setFileCount(files.length);
+        if(files.length > 0){
+          setFileCount(files.length);
+        }
         
         // Fetch usage stats
         const usageStats = await billingService.getCurrentUsage();
