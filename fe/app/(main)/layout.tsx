@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { logout } from "@/lib/redux/slices/authSlice";
 import { ReactNode } from "react";
-import { ImageIcon } from "lucide-react";
+import { CircleDotDashed } from "lucide-react";
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         <div className="container px-4 md:px-6 mx-auto max-w-6xl">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
-              <ImageIcon className="size-6 text-primary" />
+              <CircleDotDashed className="size-6 text-primary" />
               <span className="text-xl font-bold">Dotformer</span>
             </div>
             

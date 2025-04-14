@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import dotformerShot from "@/public/dotformerShot.png";
 import { ImageIcon, Zap, Code, CreditCard, Shield, Building2, Facebook, Twitter, Linkedin, Github } from "lucide-react"
+import Navbar from "@/components/Navbar";
 
 interface User {
   email: string;
@@ -28,6 +29,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <Navbar />
       {/* Hero Section */}
       <section className="relative py-20 md:py-28 overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(45%_40%_at_50%_30%,rgba(56,189,248,0.12),transparent)]" />
