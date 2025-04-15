@@ -15,12 +15,7 @@ export interface ApiKeyWithValue {
 }
 
 // Make sure this URL points to your backend server
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-
-// Check if we're in development mode - if so, ensure correct connection
-if (process.env.NODE_ENV === 'development') {
-  console.info('API URL for API key service:', API_BASE_URL);
-}
+const API_BASE_URL = 'https://api.dotformer.nafri.in/api';
 
 /**
  * Fetches all API keys for the authenticated user

@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 const codeSnippets = {
   upload: `// Upload a file
-const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/files/upload', {
+const response = await fetch('https://api.dotformer.nafri.in/api/files/upload', {
   method: 'POST',
   headers: {
     'Authorization': \`Bearer \${token}\`,
@@ -28,7 +28,7 @@ const data = await response.json();
 console.log(data); // { id: string, url: string, size: number, type: string }`,
 
   transform: `// Transform an image
-const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/files/transform/{fileId}', {
+const response = await fetch('https://api.dotformer.nafri.in/api/files/transform/{fileId}', {
   method: 'POST',
   headers: {
     'Authorization': \`Bearer \${token}\`,
@@ -54,7 +54,7 @@ const data = await response.json();
 console.log(data); // { id: string, url: string, size: number, type: string }`,
 
   list: `// List files with pagination
-const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/files?page=1&limit=10', {
+const response = await fetch('https://api.dotformer.nafri.in/api/files?page=1&limit=10', {
   headers: {
     'Authorization': \`Bearer \${token}\`,
   }
@@ -70,7 +70,7 @@ const data = await response.json();
 console.log(data); // { items: File[], total: number, page: number, limit: number }`,
 
   delete: `// Delete a file
-const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/files/{fileId}', {
+const response = await fetch('https://api.dotformer.nafri.in/api/files/{fileId}', {
   method: 'DELETE',
   headers: {
     'Authorization': \`Bearer \${token}\`,
@@ -96,7 +96,7 @@ import { FileService } from '@dotformer/sdk';
 // Initialize with your API key
 const fileService = new FileService({
   apiKey: 'YOUR_API_KEY',
-  baseUrl: '${process.env.NEXT_PUBLIC_API_URL}' // optional
+  baseUrl: 'https://api.dotformer.nafri.in/api' // optional
 });`,
 
   upload: `// Upload a file with options

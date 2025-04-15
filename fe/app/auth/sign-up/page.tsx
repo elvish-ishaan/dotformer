@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { register, clearError } from "@/lib/redux/slices/authSlice";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ImageIcon } from "lucide-react"
+import { CircleDotDashed } from "lucide-react"
 
 export default function SignUp() {
   const router = useRouter();
@@ -125,7 +125,7 @@ export default function SignUp() {
       <div className="w-full max-w-md">
         <div className="mb-8 flex justify-center">
           <Link href="/" className="flex items-center gap-2">
-            <ImageIcon className="size-6 text-primary" />
+            <CircleDotDashed className="size-6 text-primary" />
             <span className="text-xl font-bold">Dotformer</span>
           </Link>
         </div>
