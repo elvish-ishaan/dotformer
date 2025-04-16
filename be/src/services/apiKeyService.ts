@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { randomBytes, createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 // Generate a secure random API key
 export const generateApiKey = (): string => {
@@ -66,14 +65,7 @@ export const getApiKeys = async (userId: string) => {
     // Return without the actual keys
     return {
       success: true,
-      apiKeys: apiKeys.map(key => ({
-        id: key.id,
-        name: key.name,
-        lastUsed: key.lastUsed,
-        expiresAt: key.expiresAt,
-        isActive: key.isActive,
-        createdAt: key.createdAt
-      }))
+      apiKeys
     };
   } catch (error) {
     console.error('Error fetching API keys:', error);

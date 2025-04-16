@@ -28,11 +28,9 @@ router.post('/forgot-password', async (req, res) => {
 
 router.post('/reset-password', async (req, res) => {
   try {
-    console.log('reset-password route called...........')
     const { email, otp, newPassword } = req.body;
     
     const result = await authService.verifyOtpAndResetPassword(email, otp, newPassword);
-    console.log(result,'result........')
     res.json(result);
   } catch (error) {
     if (error instanceof Error) {

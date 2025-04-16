@@ -7,8 +7,6 @@ import { createApiKey, getApiKeys, deleteApiKey, updateApiKey, getApiKeyValue } 
  */
 export const createKey = async (req: Request, res: Response) => {
   try {
-    console.log('Create API key - Body:', JSON.stringify(req.body));
-    console.log('Create API key - User:', JSON.stringify(req.user));
     
     // Get the user ID from the authenticated user
     const userId = req.user?.userId;
@@ -62,7 +60,6 @@ export const getKeys = async (req: Request, res: Response) => {
     
     // Get all keys
     const result = await getApiKeys(userId);
-    console.log(result,'getting api keys...............')
     
     return res.status(200).json(result);
   } catch (error) {

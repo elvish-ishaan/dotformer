@@ -18,16 +18,13 @@ model User {
   email          String         @unique
   password       String
   name           String?
-  billingAddress String?
-  paymentMethod  String?        // Reference to payment method (e.g., Stripe customer ID)
-  subscriptionId String?        @unique
+  username       String?        @unique
+  bio            String?
+  avatar         String?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   apiKeys        ApiKey[]
   assets         Asset[]
-  usageRecords   UsageRecord[]
-  bills          Bill[]
-  subscription   Subscription?  @relation(fields: [subscriptionId], references: [id])
 }
 
 model Asset {
@@ -52,75 +49,6 @@ model ApiKey {
   createdAt   DateTime    @default(now())
   userId      String
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  usageRecords UsageRecord[]
-}
-
-model UsageRecord {
-  id            String    @id @default(uuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  apiKeyId      String?
-  apiKey        ApiKey?   @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
-  operationType String    // e.g., "upload", "transform", "storage", "download"
-  resourceId    String?   // e.g., fileId for file operations
-  quantity      Float     // amount of resources used (bytes, api calls, etc.)
-  unit          String    // e.g., "bytes", "calls", "seconds"
-  timestamp     DateTime  @default(now())
-  billed        Boolean   @default(false)
-  billId        String?
-  bill          Bill?     @relation(fields: [billId], references: [id], onDelete: SetNull)
-}
-
-model Bill {
-  id           String        @id @default(uuid())
-  userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  amount       Float
-  currency     String        @default("USD")
-  status       String        // "pending", "paid", "failed"
-  startPeriod  DateTime
-  endPeriod    DateTime
-  createdAt    DateTime      @default(now())
-  paidAt       DateTime?
-  usageRecords UsageRecord[]
-}
-
-model PricingPlan {
-  id              String         @id @default(uuid())
-  name            String
-  description     String?
-  isActive        Boolean        @default(true)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  subscriptions   Subscription[]
-  pricingTiers    PricingTier[]
-}
-
-model PricingTier {
-  id              String      @id @default(uuid())
-  pricingPlanId   String
-  pricingPlan     PricingPlan @relation(fields: [pricingPlanId], references: [id], onDelete: Cascade)
-  operationType   String
-  unitPrice       Float
-  currency        String      @default("USD")
-  unitType        String      // "byte", "call", "transformation"
-  freeQuota       Float       @default(0)
-  tier            Int         // For tiered pricing: 1, 2, 3...
-  minQuantity     Float       // Threshold for this tier
-  maxQuantity     Float?      // Max threshold (null for unlimited)
-}
-
-model Subscription {
-  id               String      @id @default(uuid())
-  userId           String
-  pricingPlanId    String
-  pricingPlan      PricingPlan @relation(fields: [pricingPlanId], references: [id])
-  startDate        DateTime    @default(now())
-  endDate          DateTime?
-  status           String      // "active", "canceled", "expired"
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-  user             User?
 }
 
 model PasswordReset {

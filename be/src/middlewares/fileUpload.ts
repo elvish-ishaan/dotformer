@@ -1,5 +1,4 @@
 import multer from 'multer';
-import path from 'path';
 import { Request, Response, NextFunction } from 'express';
 
 // Configure storage in memory (not on disk)
@@ -17,6 +16,7 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilt
     'image/gif',
     'image/webp',
     'image/svg+xml',
+    'application/pdf',
   ];
 
   // Check if file type is allowed

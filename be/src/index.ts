@@ -6,12 +6,8 @@ import authRoutes from './routes/auth';
 import fileRoutes from './routes/files';
 import apiKeyRoutes from './routes/apiKeys';
 import apiRoutes from './routes/api';
-import billingRoutes from './routes/billing';
-import { PrismaClient } from '@prisma/client';
-import { schedulerService } from './services/schedulerService';
-
-// Initialize Prisma client
-const prisma = new PrismaClient();
+import userRoutes from './routes/user';
+import prisma from './lib/prisma';
 
 // Load environment variables
 dotenv.config();
@@ -33,7 +29,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/api-keys', apiKeyRoutes);
-app.use('/api/billing', billingRoutes);
+app.use('/api/user', userRoutes);
 
 // API routes with API key authentication
 app.use('/api/v1', apiRoutes);
@@ -97,12 +93,9 @@ app.get('/transform/:fileName', async (req: Request, res: Response) => {
   }
 });
 
-// Initialize scheduled jobs
-schedulerService.initializeJobs();
 
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API endpoints available at http://localhost:${PORT}/api`);
-  console.log(`Transform endpoint: http://localhost:${PORT}/transform/:fileName`);
 }); 

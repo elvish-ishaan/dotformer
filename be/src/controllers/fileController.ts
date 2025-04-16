@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
 import { fileStorageService } from '../services/fileStorage';
 import { transformFile } from '../utils/transformation';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 /**
  * Upload a file to S3

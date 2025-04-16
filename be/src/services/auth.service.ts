@@ -1,11 +1,11 @@
-import { PrismaClient } from '@prisma/client';
 import nodemailer from 'nodemailer';
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import bcrypt from 'bcrypt';
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
+
 const readFile = promisify(fs.readFile);
 
 // Email transporter

@@ -1,10 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { hashPassword, comparePassword } from '../utils/auth/password';
 import { generateToken } from '../utils/auth/jwt';
-
-const prisma = new PrismaClient();
-
+import prisma from '../lib/prisma';
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -67,12 +64,6 @@ export const login = async (req: Request, res: Response) => {
 
     // Find the user
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return res.status(401).json({ 
-        success: false, 
-        error: 'Invalid credentials' 
-      });
-    }
     
     if(!user){
       return res.status(401).json({ 
