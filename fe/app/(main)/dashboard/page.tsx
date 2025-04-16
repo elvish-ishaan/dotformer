@@ -8,7 +8,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { fetchUserProfile } from "@/lib/redux/slices/authSlice";
 import { fileService } from "@/lib/services/fileService";
 import { Loader2 } from "lucide-react";
-import ImageTransformer from "@/components/ImageTransformer";
+
 
 export default function Dashboard() {
   const dispatch = useAppDispatch();
@@ -142,7 +142,7 @@ export default function Dashboard() {
       <p className="text-muted-foreground mb-4">
         Upload and transform images in real-time. Adjust parameters and get a permanent URL for your transformed image.
       </p>
-      <ImageTransformer />
+      <p>comming soon</p>
     </>
   );
 }
