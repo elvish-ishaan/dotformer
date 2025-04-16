@@ -35,7 +35,6 @@ export default function MainLayout({ children }: { children: ReactNode }) {
               <Link href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
               <Link href="/files" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Files</Link>
               <Link href="/upload" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Upload</Link>
-              <Link href="/transform" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Transform</Link>
               <Link href="/api-keys" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">API Keys</Link>
               <Link href="/billing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Billing</Link>
               <Link href="/settings" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Settings</Link>

@@ -9,7 +9,6 @@ import { fetchUserProfile } from "@/lib/redux/slices/authSlice";
 import { fileService } from "@/lib/services/fileService";
 import { Loader2 } from "lucide-react";
 
-
 export default function Dashboard() {
   const dispatch = useAppDispatch();
   const { user, token } = useAppSelector((state) => state.auth);
@@ -99,21 +98,12 @@ export default function Dashboard() {
       
       {/* Quick Actions Section */}
       <h2 className="text-xl font-bold mt-8 mb-4">Quick Actions</h2>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Button className="h-auto py-4" asChild>
           <Link href="/upload">
             <span className="flex flex-col">
               <span className="text-base font-medium">Upload File</span>
               <span className="text-xs text-muted-foreground">Add new files to your account</span>
-            </span>
-          </Link>
-        </Button>
-        
-        <Button className="h-auto py-4 bg-primary/90 hover:bg-primary" asChild>
-          <Link href="/transform">
-            <span className="flex flex-col">
-              <span className="text-base font-medium">Transform Images</span>
-              <span className="text-xs text-muted-foreground">Convert and resize your images</span>
             </span>
           </Link>
         </Button>
@@ -136,13 +126,6 @@ export default function Dashboard() {
           </Link>
         </Button>
       </div>
-      
-      {/* Image Transformer Section */}
-      <h2 className="text-xl font-bold mt-8 mb-4">Image Transformer</h2>
-      <p className="text-muted-foreground mb-4">
-        Upload and transform images in real-time. Adjust parameters and get a permanent URL for your transformed image.
-      </p>
-      <p>comming soon</p>
     </>
   );
 }
