@@ -1,9 +1,11 @@
 import { fetchWithAuth } from '@/lib/auth/authUtils';
+import { BACKEND_BASE_URL } from '../constants';
 
 export interface ApiKey {
   id: string;
   name: string;
   prefix: string;
+  key?: string;
   createdAt: string;
   lastUsed: string | null;
   isActive: boolean;
@@ -15,7 +17,7 @@ export interface ApiKeyWithValue {
 }
 
 // Make sure this URL points to your backend server
-const API_BASE_URL = 'https://api.dotformer.nafri.in/api';
+const API_BASE_URL = BACKEND_BASE_URL;
 
 /**
  * Fetches all API keys for the authenticated user
@@ -66,12 +68,10 @@ export async function getApiKeys(): Promise<{ success: boolean; apiKeys?: ApiKey
  */
 export async function createApiKey(name: string, expiresInDays?: number): Promise<{ 
   success: boolean; 
-  apiKey?: ApiKeyWithValue; 
+  apiKey?: ApiKey; 
   error?: string 
 }> {
   try {
-    console.log(`Creating API key with name: ${name}, expires in: ${expiresInDays || 'no expiration'}`);
-    console.log('API endpoint:', `${API_BASE_URL}/api-keys`);
     
     const requestBody = { name, expiresInDays };
     console.log('Request body:', JSON.stringify(requestBody));
@@ -99,27 +99,6 @@ export async function createApiKey(name: string, expiresInDays?: number): Promis
     try {
       const data = await response.json();
       console.log('API key created successfully:', data.success);
-      
-      // For mock testing in development
-      if (process.env.NODE_ENV === 'development' && !data.apiKey && data.success) {
-        // Create a mock API key for testing if backend doesn't return one
-        console.log('Creating mock API key for development testing');
-        const mockApiKey = {
-          apiKey: {
-            id: `mock_${Date.now()}`,
-            name: name,
-            prefix: 'key_',
-            createdAt: new Date().toISOString(),
-            lastUsed: null,
-            isActive: true
-          },
-          value: `key_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
-        };
-        return { 
-          success: true, 
-          apiKey: mockApiKey 
-        };
-      }
       
       return data;
     } catch (parseError) {

@@ -1,8 +1,9 @@
+import { BACKEND_BASE_URL } from '@/lib/constants';
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
 
 // Define the API base URL
-const API_BASE_URL = 'https://api.dotformer.nafri.in/api';
+const API_BASE_URL =  BACKEND_BASE_URL;
 
 // Types
 interface User {
@@ -72,6 +73,7 @@ export const login = createAsyncThunk(
       });
 
       const data = await response.json();
+      console.log(data,'getting login data')
 
       if (!response.ok) {
         return rejectWithValue(data.error || 'Login failed');
@@ -168,6 +170,70 @@ export const fetchUserProfile = createAsyncThunk(
   }
 );
 
+export const updateUserProfile = createAsyncThunk(
+  'auth/updateUserProfile',
+  async (profileData: { name?: string; email?: string; bio?: string; username?: string }, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState() as { auth: AuthState };
+      
+      if (!auth.token) {
+        return rejectWithValue('No authentication token');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/user/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`,
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.error || 'Failed to update profile');
+      }
+
+      return data.data;
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to update profile');
+    }
+  }
+);
+
+export const updateUserPassword = createAsyncThunk(
+  'auth/updateUserPassword',
+  async (passwordData: { currentPassword: string; newPassword: string }, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState() as { auth: AuthState };
+      
+      if (!auth.token) {
+        return rejectWithValue('No authentication token');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/user/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`,
+        },
+        body: JSON.stringify(passwordData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.error || 'Failed to update password');
+      }
+
+      return data.message;
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to update password');
+    }
+  }
+);
+
 // Auth slice
 const authSlice = createSlice({
   name: 'auth',
@@ -248,6 +314,33 @@ const authSlice = createSlice({
           state.isAuthenticated = false;
           state.token = null;
         }
+      })
+      
+    // Update user profile cases
+      .addCase(updateUserProfile.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+      })
+      .addCase(updateUserProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      
+    // Update user password cases
+      .addCase(updateUserPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUserPassword.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(updateUserPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });

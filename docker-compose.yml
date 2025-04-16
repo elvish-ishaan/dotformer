@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./be
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./be/.env
+    volumes:
+      - ./be/uploads:/app/uploads
+    networks:
+      - dotformer-network
+    container_name: dotformer-backend
+    restart: unless-stopped
+
+  transformer:
+    build:
+      context: ./transformer
+    ports:
+      - "3002:3002"
+    env_file:
+      - ./transformer/.env
+    networks:
+      - dotformer-network
+    container_name: dotformer-transformer
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+networks:
+  dotformer-network:
+    driver: bridge 

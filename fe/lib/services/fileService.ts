@@ -1,5 +1,7 @@
+import { BACKEND_BASE_URL } from "../constants";
+
 // Define the API base URL
-const API_BASE_URL = 'https://api.dotformer.nafri.in/api';
+const API_BASE_URL = BACKEND_BASE_URL;
 
 interface TransformOptions {
   width?: number;

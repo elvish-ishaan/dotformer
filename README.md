@@ -186,4 +186,49 @@ The API documentation is available in the `docs` directory. Key endpoints includ
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## CI/CD Pipeline
+
+Dotformer uses GitHub Actions for CI/CD to automatically test, build, and deploy the backend and transformer services to AWS EC2 instances.
+
+### CI Pipeline
+
+The CI pipeline is triggered on pushes to the `main` and `development` branches, as well as pull requests to these branches. It:
+
+1. Runs tests for both backend and transformer services
+2. Builds Docker images for validation
+
+### CD Pipeline
+
+The CD pipeline is triggered after a successful CI run on the `main` branch. It:
+
+1. Builds and pushes Docker images to Docker Hub
+2. Deploys the images to AWS EC2 instances
+3. Manages container lifecycle (stopping, removing, and starting new containers)
+
+### Local Docker Development
+
+You can use Docker Compose for local development:
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+```
+
+### Deployment to AWS
+
+To set up AWS deployment:
+
+1. Configure the required GitHub repository secrets (see `.github/workflows/README.md`)
+2. Create repositories on Docker Hub for the images
+3. Set up EC2 instance with Docker installed
+4. Run the EC2 setup script: `bash scripts/ec2-setup.sh`
+
+For more details, see the [CI/CD documentation](.github/workflows/README.md). 

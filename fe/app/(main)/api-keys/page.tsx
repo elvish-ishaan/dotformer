@@ -37,7 +37,7 @@ import {
   ClipboardCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { getApiKeys, createApiKey, deleteApiKey, ApiKey } from '@/lib/services/apiKeyService';
+import { getApiKeys, createApiKey, deleteApiKey, ApiKey, ApiKeyWithValue } from '@/lib/services/apiKeyService';
 import { getAuthToken, setAuthToken } from '@/lib/auth/authUtils';
 import { useAppSelector } from '@/lib/redux/hooks';
 
@@ -54,9 +54,6 @@ export default function ApiKeysPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [showKey, setShowKey] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [visibleKeyId, setVisibleKeyId] = useState<string | null>(null);
-  const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
-  const [apiKeyValues, setApiKeyValues] = useState<Record<string, string>>({});
   
   // Get auth state from Redux
   const authState = useAppSelector((state) => state.auth);
@@ -70,6 +67,8 @@ export default function ApiKeysPage() {
       console.log('Set test auth token for development');
     }
   }, []);
+
+  useEffect(()=>{console.log(apiKeys)},[apiKeys])
   
   const fetchApiKeys = useCallback(async () => {
     if (!isAuthenticated) return;
@@ -79,9 +78,9 @@ export default function ApiKeysPage() {
     
     try {
       const result = await getApiKeys();
+      console.log(result,'getting api key result')
       if (result.success && result.apiKeys) {
         setApiKeys(result?.apiKeys);
-        router.refresh();
       } else {
         setError(result.error || 'Failed to fetch API keys');
         toast.error(result.error || 'Failed to fetch API keys');
@@ -97,7 +96,7 @@ export default function ApiKeysPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const token = getAuthToken();
@@ -129,30 +128,43 @@ export default function ApiKeysPage() {
   
   const handleCreateKey = async () => {
     if (!newKeyName.trim() || !isAuthenticated) return;
+    const isExisting = apiKeys.some(key => key.name === newKeyName.trim())
+
+    if(isExisting){
+      toast.info('Key name should be unique') 
+      return
+    }
     
     setIsCreating(true);
     setError(null);
     
     try {
       const result = await createApiKey(newKeyName);
-      
-      if (result.success && result.apiKey?.value && result.apiKey?.apiKey) {
-        const { value, apiKey } = result.apiKey;
-        
-        // Set the generated key value to show in the UI
-        setGeneratedKey(value);
-        
-        // Store the actual key value
-        setApiKeyValues(prev => ({
-          ...prev,
-          [apiKey.id]: value
-        }));
-        
-        // Add the new key to the list
-        setApiKeys(prevKeys => [
-          apiKey,
-          ...prevKeys
-        ]);
+
+      if (result.success && result.apiKey) {
+        if ('value' in result.apiKey && 'apiKey' in result.apiKey) {
+          const { value, apiKey } = result.apiKey as unknown as ApiKeyWithValue;
+          
+          setGeneratedKey(value);
+          
+          setApiKeys(prevKeys => [
+            apiKey,
+            ...prevKeys
+          ]);
+        } else {
+          setApiKeys(prevKeys => [
+            result.apiKey as ApiKey,
+            ...prevKeys
+          ]);
+          
+          if (result.apiKey.key) {
+            setGeneratedKey(result.apiKey.key);
+          } else {
+            setIsDialogOpen(false);
+            toast.success('API key created successfully', { description: 'Your new API key has been added to the list.' });
+            return;
+          }
+        }
         
         toast.success('API key created successfully');
         
@@ -244,32 +256,6 @@ export default function ApiKeysPage() {
     } finally {
       setIsDeleting(null);
     }
-  };
-
-  const toggleApiKeyVisibility = (keyId: string) => {
-    if (visibleKeyId === keyId) {
-      setVisibleKeyId(null);
-    } else {
-      setVisibleKeyId(keyId);
-    }
-  };
-  
-  const copyApiKeyPrefix = (prefix: string) => {
-    navigator.clipboard.writeText(prefix);
-    toast.success('API key prefix copied to clipboard');
-  };
-
-  const getMaskedKeyDisplay = (key: ApiKey) => {
-    if (visibleKeyId === key.id) {
-      // Show the actual key value if we have it stored
-      const actualKey = apiKeyValues[key.id];
-      if (actualKey) {
-        return <span className="text-green-600">{actualKey}</span>;
-      }
-      // If we don't have the actual key, show the prefix with masked value
-      return <span>{key.prefix}••••••••••••••</span>;
-    }
-    return <span>{key.prefix}••••••••••••••</span>;
   };
 
   // Check if user is not authenticated
@@ -434,7 +420,7 @@ export default function ApiKeysPage() {
         <CardHeader>
           <CardTitle>Your API Keys</CardTitle>
           <CardDescription>
-            You have {apiKeys.length} active API key{apiKeys.length !== 1 ? 's' : ''}
+            You have {apiKeys?.length} active API key{apiKeys?.length !== 1 ? 's' : ''}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -454,7 +440,7 @@ export default function ApiKeysPage() {
             <div className="flex justify-center items-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-          ) : apiKeys.length === 0 ? (
+          ) : apiKeys?.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No API keys found. Create one to get started.</p>
             </div>
@@ -470,61 +456,29 @@ export default function ApiKeysPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {apiKeys.map((apiKey) => (
-                  <TableRow key={apiKey.id}>
-                    <TableCell className="font-medium">{apiKey.name}</TableCell>
+                {apiKeys?.map((apiKey) => (
+                  <TableRow key={apiKey?.id}>
+                    <TableCell className="font-medium">{apiKey?.name}</TableCell>
                     <TableCell className="font-mono text-sm flex items-center gap-2">
                       <Key className="h-3.5 w-3.5 text-muted-foreground" />
-                      {getMaskedKeyDisplay(apiKey)}
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-6 w-6 ml-1"
-                        onClick={() => toggleApiKeyVisibility(apiKey.id)}
-                        aria-label={visibleKeyId === apiKey.id ? "Hide API key" : "Show API key"}
-                      >
-                        {visibleKeyId === apiKey.id ? (
-                          <EyeOff className="h-3.5 w-3.5" />
-                        ) : (
-                          <Eye className="h-3.5 w-3.5" />
-                        )}
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => {
-                          // In a real app, you might copy the full key if visible
-                          // For now, we'll just copy the prefix
-                          copyApiKeyPrefix(apiKey.prefix);
-                          setCopiedKeyId(apiKey.id);
-                          setTimeout(() => setCopiedKeyId(null), 2000);
-                        }}
-                        aria-label="Copy API key prefix"
-                      >
-                        {copiedKeyId === apiKey.id ? (
-                          <ClipboardCheck className="h-3.5 w-3.5 text-green-600" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" />
-                        )}
-                      </Button>
+                      {apiKey?.key}
                     </TableCell>
                     <TableCell>
-                      {new Date(apiKey.createdAt).toLocaleDateString()}
+                      {new Date(apiKey?.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      {apiKey.lastUsed 
-                        ? new Date(apiKey.lastUsed).toLocaleDateString() 
+                      {apiKey?.lastUsed 
+                        ? new Date(apiKey?.lastUsed).toLocaleDateString() 
                         : 'Never used'}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        onClick={() => handleDeleteKey(apiKey.id)}
-                        disabled={isDeleting === apiKey.id}
+                        onClick={() => handleDeleteKey(apiKey?.id)}
+                        disabled={isDeleting === apiKey?.id}
                       >
-                        {isDeleting === apiKey.id ? (
+                        {isDeleting === apiKey?.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
                           <Trash2 className="h-4 w-4" />

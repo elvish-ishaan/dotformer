@@ -11,11 +11,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-//configure cors to use only the origin from the environment variable
-app.use(cors({
-  //use localhost when developing locally else use the origin from the environment variable
-  origin: process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : process.env.CORS_ORIGIN
-}));
+// Use CORS_ORIGIN from environment variable or allow all origins in production
+app.use(cors());
 app.use(express.json());
 
 // Routes

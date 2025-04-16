@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from 'react';
-import { useAppSelector } from '@/lib/redux/hooks';
+import { useState, useEffect } from 'react';
+import { useAppSelector, useAppDispatch } from '@/lib/redux/hooks';
+import { updateUserProfile, updateUserPassword, clearError } from '@/lib/redux/slices/authSlice';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,11 +10,16 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
+import Avatar, { genConfig, AvatarConfig } from 'react-nice-avatar';
+import { 
+  RotateCw, 
+  Check
+} from 'lucide-react';
 
 export default function SettingsPage() {
-  const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const { user, isLoading, error } = useAppSelector((state) => state.auth);
   
   const [profileForm, setProfileForm] = useState({
     name: user?.name || '',
@@ -35,6 +41,41 @@ export default function SettingsPage() {
     updates: true,
   });
 
+  // State for avatar configuration
+  const [avatarConfig, setAvatarConfig] = useState<AvatarConfig | null>(null);
+  const [showAvatarOptions, setShowAvatarOptions] = useState(false);
+
+  // Generate a random avatar or seed-based avatar on initial load
+  useEffect(() => {
+    if (user?.email) {
+      // Use user's email as seed for consistent avatar generation
+      setAvatarConfig(genConfig(user.email));
+    } else {
+      // Generate random avatar if no email
+      setAvatarConfig(genConfig());
+    }
+  }, [user?.email]);
+
+  // Update local form when user data changes
+  useEffect(() => {
+    if (user) {
+      setProfileForm({
+        name: user.name || '',
+        email: user.email || '',
+        bio: user.bio || '',
+        username: user.username || '',
+      });
+    }
+  }, [user]);
+
+  // Display errors from redux state
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
+
   const handleProfileFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setProfileForm({
       ...profileForm,
@@ -49,13 +90,30 @@ export default function SettingsPage() {
     });
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would be an API call to update the profile
-    toast.success('Profile updated successfully');
+    
+    // Only send fields that have changed
+    const updatedFields: any = {};
+    if (profileForm.name !== user?.name) updatedFields.name = profileForm.name;
+    if (profileForm.email !== user?.email) updatedFields.email = profileForm.email;
+    if (profileForm.bio !== user?.bio) updatedFields.bio = profileForm.bio;
+    if (profileForm.username !== user?.username) updatedFields.username = profileForm.username;
+    
+    // Check if any fields have changed
+    if (Object.keys(updatedFields).length === 0) {
+      toast.info('No changes to save');
+      return;
+    }
+    
+    const resultAction = await dispatch(updateUserProfile(updatedFields));
+    
+    if (updateUserProfile.fulfilled.match(resultAction)) {
+      toast.success('Profile updated successfully');
+    }
   };
 
-  const handleChangePassword = (e: React.FormEvent) => {
+  const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
@@ -63,13 +121,24 @@ export default function SettingsPage() {
       return;
     }
     
-    // In a real app, this would be an API call to change the password
-    toast.success('Password changed successfully');
-    setPasswordForm({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    });
+    const resultAction = await dispatch(updateUserPassword({
+      currentPassword: passwordForm.currentPassword,
+      newPassword: passwordForm.newPassword
+    }));
+    
+    if (updateUserPassword.fulfilled.match(resultAction)) {
+      toast.success('Password changed successfully');
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+    }
+  };
+
+  const handleSaveNotifications = () => {
+    // In a real app, this would call an API to save notification preferences
+    toast.success('Notification preferences saved');
   };
 
   const handleDeleteAccount = () => {
@@ -77,13 +146,17 @@ export default function SettingsPage() {
     toast.error('Account deletion would be implemented in a real app');
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
+  // Generate a new random avatar
+  const generateRandomAvatar = () => {
+    setAvatarConfig(genConfig());
+  };
+
+  // Update avatar in profile if we had a backend endpoint for it
+  const saveAvatar = async () => {
+    toast.success('Avatar updated successfully');
+    // In a real app, we would save the avatar configuration to the user's profile
+    // Example: await dispatch(updateUserAvatar(avatarConfig));
+    setShowAvatarOptions(false);
   };
 
   return (
@@ -114,15 +187,69 @@ export default function SettingsPage() {
               <form onSubmit={handleSaveProfile} className="space-y-6">
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="flex flex-col items-center space-y-4">
-                    <Avatar className="h-24 w-24">
-                      <AvatarImage src={user?.avatar || undefined} alt={user?.name || 'User'} />
-                      <AvatarFallback className="text-lg">
-                        {user?.name ? getInitials(user.name) : 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <Button variant="outline" size="sm">
-                      Change Avatar
-                    </Button>
+                    {avatarConfig && (
+                      <div className="relative">
+                        <Avatar
+                          className="h-24 w-24"
+                          {...avatarConfig}
+                        />
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="outline"
+                          className="absolute -bottom-2 -right-2 rounded-full"
+                          onClick={() => {
+                            setShowAvatarOptions(!showAvatarOptions);
+                          }}
+                        >
+                          <RotateCw className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {showAvatarOptions && (
+                      <div className="flex flex-col gap-2 items-center p-3 border rounded-md bg-background">
+                        <div className="text-sm font-medium mb-2">Randomize your avatar</div>
+                        
+                        <div className="grid grid-cols-3 gap-2">
+                          {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <div 
+                              key={i} 
+                              className="cursor-pointer p-1 border rounded-md hover:bg-accent"
+                              onClick={() => setAvatarConfig(genConfig())}
+                            >
+                              <Avatar
+                                className="h-12 w-12"
+                                {...genConfig()}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        
+                        <div className="flex gap-2 mt-3">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={generateRandomAvatar}
+                          >
+                            Randomize
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={saveAvatar}
+                          >
+                            <Check className="mr-1 h-4 w-4" />
+                            Save
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="text-sm text-center text-muted-foreground">
+                      Cartoon avatar generated automatically
+                    </div>
                   </div>
 
                   <div className="flex-1 space-y-4">
@@ -168,7 +295,9 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="flex justify-end">
-                  <Button type="submit">Save Changes</Button>
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? 'Saving...' : 'Save Changes'}
+                  </Button>
                 </div>
               </form>
             </CardContent>
@@ -216,7 +345,9 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div className="flex justify-end">
-                  <Button type="submit">Update Password</Button>
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? 'Updating...' : 'Update Password'}
+                  </Button>
                 </div>
               </form>
             </CardContent>
@@ -327,7 +458,7 @@ export default function SettingsPage() {
               </div>
               
               <div className="flex justify-end">
-                <Button onClick={() => toast.success('Notification preferences saved')}>
+                <Button onClick={handleSaveNotifications}>
                   Save Preferences
                 </Button>
               </div>
