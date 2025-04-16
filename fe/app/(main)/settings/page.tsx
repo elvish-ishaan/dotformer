@@ -94,7 +94,13 @@ export default function SettingsPage() {
     e.preventDefault();
     
     // Only send fields that have changed
-    const updatedFields: any = {};
+    const updatedFields: {
+      name?: string;
+      email?: string;
+      bio?: string;
+      username?: string;
+    } = {};
+    
     if (profileForm.name !== user?.name) updatedFields.name = profileForm.name;
     if (profileForm.email !== user?.email) updatedFields.email = profileForm.email;
     if (profileForm.bio !== user?.bio) updatedFields.bio = profileForm.bio;

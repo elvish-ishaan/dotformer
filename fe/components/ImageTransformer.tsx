@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import Image from 'next/image';
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -6,7 +7,6 @@ import { Label } from "./ui/label";
 import { Separator } from "./ui/separator";
 import { FileUpload } from "./ui/file-upload";
 import { fileService } from "@/lib/services/fileService";
-import { BACKEND_BASE_URL } from "@/lib/constants";
 import { Loader2 } from "lucide-react";
 
 interface TransformOptions {
@@ -29,18 +29,6 @@ interface UploadedFile {
   url: string;
 }
 
-interface UploadResponse {
-  success: boolean;
-  asset?: {
-    id: string;
-    fileName: string;
-    fileSize: number;
-    fileType: string;
-    url: string;
-  };
-  error?: string;
-}
-
 export default function ImageTransformer() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const [transformedUrl, setTransformedUrl] = useState<string | null>(null);
@@ -58,7 +46,7 @@ export default function ImageTransformer() {
   // Remove the automatic transformation effect
   // We'll only transform when the user clicks the button
   
-  const handleUploadSuccess = (response: any) => {
+  const handleUploadSuccess = (response: { success: boolean; asset?: { id: string; fileName: string; fileSize: number; fileType: string; url: string; } }) => {
     console.log('Upload response:', response);
     
     // Check if the response contains the asset property
@@ -153,10 +141,12 @@ export default function ImageTransformer() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <h3 className="text-sm font-medium">Original Image</h3>
-                <img 
+                <Image 
                   src={uploadedFile.url} 
                   alt="Original" 
                   className="max-w-full h-auto rounded-md border"
+                  width={400}
+                  height={200}
                   style={{ maxHeight: '200px', objectFit: 'contain' }}
                 />
                 <p className="text-xs text-muted-foreground">
@@ -221,7 +211,7 @@ export default function ImageTransformer() {
                   <select
                     id="fit"
                     value={transformOptions.fit || 'cover'}
-                    onChange={(e) => handleOptionChange('fit', e.target.value as any)}
+                    onChange={(e) => handleOptionChange('fit', e.target.value as 'cover' | 'contain' | 'fill' | 'inside' | 'outside')}
                     className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="cover">Cover</option>
@@ -290,10 +280,12 @@ export default function ImageTransformer() {
               <div className="space-y-4 flex-grow flex flex-col">
                 <div className="flex-grow flex flex-col items-center justify-center">
                   <h3 className="text-sm font-medium mb-2">Transformed Image</h3>
-                  <img 
+                  <Image 
                     src={getPreviewUrl() || ''} 
                     alt="Transformed" 
                     className="max-w-full h-auto rounded-md border"
+                    width={400}
+                    height={300}
                     style={{ maxHeight: '300px', objectFit: 'contain' }}
                   />
                 </div>
